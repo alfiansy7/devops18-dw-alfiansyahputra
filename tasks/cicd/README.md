@@ -83,7 +83,7 @@ pipeline{
                     cd ~
                     docker compose down
                     cd ${dir}
-                    git pull origin main
+                    git pull origin ${branch}
                     exit
                     EOF"""
                 }
@@ -94,7 +94,7 @@ pipeline{
                 sshagent([cred]){
                     sh """ssh -o StrictHostKeyChecking=no ${server} << EOF
                     cd ${dir}
-                    docker build -t zipian/wayshub-fe .
+                    docker build -t ${img} .
                     exit
                     EOF"""
                 }
@@ -162,7 +162,75 @@ git push
 
 ## 2. GitLabCI
 
-19.
+19. Buat variable pada repositori yang ingin di gunakan
+```bash
+Settings -> CI/CD -> Variables
+``` 
+<img src="images/image019.png">
+
+20. Membuat file gitlab ci pada *Pipeline Editor*
+```bash
+stages:
+  - build
+  - deploy
+  
+build-image:
+  stage: build
+  image: docker:1.11
+  services:
+    - docker:dind
+  script:
+    - export DOCKER_HOST=tcp://docker:2375/
+    - docker version
+    - docker build -t zipian/dumbflix-ci:latest .
+    # push only for tags
+      # - "[[ -z $CI_BUILD_TAG ]] && exit 0"
+      # - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$CI_BUILD_TAG
+    - docker login -u zipian -p $PASS_DOCKER
+    - docker push zipian/dumbflix-ci:latest
+
+deploy-app:
+  stage: deploy
+  before_script:
+  - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )' 
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - ssh-keyscan $VM_ADDRESS >> ~/.ssh/known_hosts
+  - chmod 644 ~/.ssh/known_hosts
+  script:
+  - ssh $SSH_USER@$VM_ADDRESS "cd ~/dumbflix-ci/ && docker compose up -d"
+``` 
+<img src="images/image020.png">
+
+
+21. Membuat file docker compose ymal pada appserver
+```bash
+mkdir dumbflix-ci
+cd dumbflix-ci/
+nano docker-compose.yml
+``` 
+
+```bash
+version: "3.8"
+services:
+  dumbflix:
+    image: zipian/dumbflix-ci
+    container_name: dumbflix-ci
+    stdin_open: true
+    ports:
+      - 3001:3000
+``` 
+
+22. Lakukan push dan lihat job yang berjalan
+```bash
+Build -> Jobs
+``` 
+<img src="images/image022.png">
+
+23. Lakukan pengecekan 
+<img src="images/image023.png">
 
 
 [**Back**](../../README.md)
