@@ -10,3 +10,7 @@
 - [Docker](tasks/docker/README.md)
 - [CI/CD : Jenkins, GitLabCI & GitHub Action](tasks/cicd/README.md)
 
+#### Week 3
+- [Terraform](tasks/terraform/README.md)
+- [Ansible](tasks/ansible/README.md)
+- [Monitoring](tasks/monitoring/README.md)
