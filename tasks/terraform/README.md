@@ -88,4 +88,70 @@ terraform destroy
 ``` 
 <img src="images/image010.png">
 
+## AWS
+
+11. Install unzip dan AWS CLI
+```bash
+sudo apt install unzip -y
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+``` 
+<img src="images/image011.png">
+
+12. Config aws cli dengan data yg di generate dari IAM
+<img src="images/image012-1.png">
+<img src="images/image012-2.png">
+
+13. membuat direktori aws dan file main.tf
+```bash
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+# Configure the AWS Provider
+provider "aws" {
+  region = "ap-southeast-3"
+  #Asia Pacific (Jakarta) ap-southeast-3
+}
+
+resource "aws_instance" "al-server" {
+  ami = "ami-07a920f17020024b9"
+  #Amazon Linux 2023 AMI 2023.2.20231002.0 x86_64 HVM kernel-6.1
+  instance_type = "t3.micro"
+  #2vCPU 1GB Memory (Free tier)
+
+  tags = {
+    Name = "trial-terraform"
+    #nama ec2
+  }
+}
+``` 
+
+14. Inisialisasi direktori tersebut
+```bash
+terraform init
+``` 
+<img src="images/image014.png">
+
+15. Lakukan pengecekan detail apa saja yang akan dijalankan oleh terraform
+```bash
+terraform plan
+``` 
+<img src="images/image015.png">
+
+16. Buat ec2 dengan menjalankan terraform
+```bash
+terraform apply
+``` 
+<img src="images/image016.png">
+
+17. Cek di aws
+<img src="images/image017.png">
+
 [**Back**](../../README.md)
